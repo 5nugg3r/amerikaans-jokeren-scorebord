@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amerikaans Jokeren - Scorebord</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Startscherm -->
+    <div id="view-home" class="view">
+        <div class="home-container">
+            <h1>Amerikaans Jokeren</h1>
+            <p class="subtitle">Scorebord</p>
+            <div class="home-info">
+                <p>Houd eenvoudig de score bij van jullie potje Amerikaans Jokeren.</p>
+                <div class="rounds-preview">
+                    <h3>De 7 rondes</h3>
+                    <ol>
+                        <li>Drie opvolgende kaarten</li>
+                        <li>Drie gelijke kaarten</li>
+                        <li>Vier opvolgende kaarten</li>
+                        <li>Vier gelijke kaarten</li>
+                        <li>Vijf opvolgende kaarten</li>
+                        <li>Zes opvolgende kaarten</li>
+                        <li>Alles in één keer</li>
+                    </ol>
+                </div>
+            </div>
+            <button id="btn-new-game" class="btn btn-primary btn-large">Nieuw spel starten</button>
+        </div>
+    </div>
+
+    <!-- Speler-setup -->
+    <div id="view-setup" class="view hidden">
+        <div class="setup-container">
+            <h1>Spelers instellen</h1>
+            <div class="add-player-form">
+                <input type="text" id="input-player-name" placeholder="Naam van speler" maxlength="20" autocomplete="off">
+                <button id="btn-add-player" class="btn btn-primary">Toevoegen</button>
+            </div>
+            <div id="player-list" class="player-list"></div>
+            <div id="dealer-section" class="dealer-section hidden">
+                <h3>Deler</h3>
+                <div class="dealer-options">
+                    <label class="dealer-option">
+                        <input type="radio" name="dealer" value="random" checked>
+                        <span>Willekeurig</span>
+                    </label>
+                    <div id="dealer-player-options"></div>
+                </div>
+            </div>
+            <div id="setup-actions" class="setup-actions hidden">
+                <button id="btn-start-game" class="btn btn-primary btn-large">Spel starten</button>
+            </div>
+            <p id="setup-hint" class="hint">Voeg minimaal 2 spelers toe om te beginnen.</p>
+        </div>
+    </div>
+
+    <!-- Scorebord -->
+    <div id="view-game" class="view hidden">
+        <div class="game-container">
+            <div class="game-header">
+                <h1>Amerikaans Jokeren</h1>
+                <div id="round-info" class="round-info"></div>
+            </div>
+            <div class="scoreboard-wrapper">
+                <table id="scoreboard" class="scoreboard">
+                    <thead id="scoreboard-head"></thead>
+                    <tbody id="scoreboard-body"></tbody>
+                    <tfoot id="scoreboard-foot"></tfoot>
+                </table>
+            </div>
+            <div id="game-actions" class="game-actions"></div>
+            <div class="game-footer">
+                <div id="qr-container" class="qr-container">
+                    <h3>Deel dit spel</h3>
+                    <div id="qr-code"></div>
+                    <p class="qr-hint">Scan de QR-code om het scorebord te bekijken</p>
+                </div>
+                <div class="points-info">
+                    <h3>Puntentelling</h3>
+                    <ul>
+                        <li><strong>Joker:</strong> 20 punten</li>
+                        <li><strong>Plaatje (B/V/H):</strong> 10 punten</li>
+                        <li><strong>Overige kaarten:</strong> 5 punten</li>
+                    </ul>
+                    <p class="points-note">Een joker telt als 10 punten als je niet hebt kunnen uitleggen.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Score invoer modal -->
+    <div id="modal-scores" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <h2 id="modal-round-title"></h2>
+            <div id="score-inputs" class="score-inputs"></div>
+            <div class="modal-actions">
+                <button id="btn-cancel-scores" class="btn btn-secondary">Annuleren</button>
+                <button id="btn-save-scores" class="btn btn-primary">Opslaan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Winnaar modal -->
+    <div id="modal-winner" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content modal-winner">
+            <h2>Spel afgelopen!</h2>
+            <div id="winner-info"></div>
+            <button id="btn-new-game-end" class="btn btn-primary btn-large">Nieuw spel starten</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/ui.js"></script>
+</body>
+</html>

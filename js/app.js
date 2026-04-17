@@ -1,0 +1,149 @@
+// === Amerikaans Jokeren - App Logic ===
+
+const ROUNDS = [
+    'Drie opvolgende kaarten',
+    'Drie gelijke kaarten',
+    'Vier opvolgende kaarten',
+    'Vier gelijke kaarten',
+    'Vijf opvolgende kaarten',
+    'Zes opvolgende kaarten',
+    'Alles in één keer'
+];
+
+const App = {
+    // Generate a GUID
+    generateId() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+            const r = Math.random() * 16 | 0;
+            return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        });
+    },
+
+    // localStorage helpers
+    loadGame(id) {
+        const data = localStorage.getItem('aj_game_' + id);
+        return data ? JSON.parse(data) : null;
+    },
+
+    saveGame(game) {
+        localStorage.setItem('aj_game_' + game.id, JSON.stringify(game));
+    },
+
+    // Create a new game
+    createGame() {
+        const id = this.generateId();
+        const game = {
+            id,
+            players: [],
+            dealerIndex: -1,
+            currentRound: 0,
+            scores: [],
+            status: 'setup',
+            createdAt: new Date().toISOString()
+        };
+        this.saveGame(game);
+        return game;
+    },
+
+    // Add player to game
+    addPlayer(game, name) {
+        game.players.push(name);
+        this.saveGame(game);
+    },
+
+    // Remove player from game
+    removePlayer(game, index) {
+        game.players.splice(index, 1);
+        if (game.dealerIndex >= game.players.length) {
+            game.dealerIndex = -1;
+        }
+        this.saveGame(game);
+    },
+
+    // Move player in order
+    movePlayer(game, fromIndex, toIndex) {
+        if (toIndex < 0 || toIndex >= game.players.length) return;
+        const [player] = game.players.splice(fromIndex, 1);
+        game.players.splice(toIndex, 0, player);
+        this.saveGame(game);
+    },
+
+    // Set dealer
+    setDealer(game, index) {
+        game.dealerIndex = index;
+        this.saveGame(game);
+    },
+
+    // Start the game
+    startGame(game) {
+        if (game.players.length < 2) return false;
+        if (game.dealerIndex < 0 || game.dealerIndex >= game.players.length) {
+            game.dealerIndex = Math.floor(Math.random() * game.players.length);
+        }
+        game.status = 'playing';
+        game.currentRound = 0;
+        game.scores = [];
+        this.saveGame(game);
+        return true;
+    },
+
+    // Submit scores for current round
+    submitScores(game, roundScores) {
+        game.scores.push(roundScores);
+        game.currentRound = game.scores.length;
+        if (game.currentRound >= ROUNDS.length) {
+            game.status = 'finished';
+        }
+        this.saveGame(game);
+    },
+
+    // Update scores for a previously completed round
+    updateScores(game, roundIndex, roundScores) {
+        game.scores[roundIndex] = roundScores;
+        this.saveGame(game);
+    },
+
+    // Get cumulative totals
+    getTotals(game) {
+        const totals = new Array(game.players.length).fill(0);
+        for (const round of game.scores) {
+            for (let i = 0; i < round.length; i++) {
+                totals[i] += round[i];
+            }
+        }
+        return totals;
+    },
+
+    // Get dealer index for a specific round
+    getDealerForRound(game, roundIndex) {
+        return (game.dealerIndex + roundIndex) % game.players.length;
+    },
+
+    // Get winner (lowest score)
+    getWinner(game) {
+        const totals = this.getTotals(game);
+        let minScore = Infinity;
+        let winnerIndex = 0;
+        for (let i = 0; i < totals.length; i++) {
+            if (totals[i] < minScore) {
+                minScore = totals[i];
+                winnerIndex = i;
+            }
+        }
+        return { name: game.players[winnerIndex], score: minScore, index: winnerIndex };
+    },
+
+    // Parse hash route
+    parseRoute() {
+        const hash = window.location.hash.slice(1);
+        if (!hash) return { view: 'home' };
+
+        const setupMatch = hash.match(/^game\/([a-f0-9-]+)\/setup$/);
+        if (setupMatch) return { view: 'setup', gameId: setupMatch[1] };
+
+        const gameMatch = hash.match(/^game\/([a-f0-9-]+)$/);
+        if (gameMatch) return { view: 'game', gameId: gameMatch[1] };
+
+        return { view: 'home' };
+    }
+};
