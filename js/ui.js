@@ -138,14 +138,13 @@ const UI = {
             </label>
         `).join('');
 
-        // Check random if no specific dealer set
         const randomRadio = document.querySelector('input[name="dealer"][value="random"]');
         if (game.dealerIndex < 0) {
             randomRadio.checked = true;
         }
-        randomRadio.addEventListener('change', () => {
+        randomRadio.onchange = () => {
             App.setDealer(game, -1);
-        });
+        };
     },
 
     onMovePlayer(index, direction) {
@@ -363,7 +362,10 @@ const UI = {
             const qr = qrcode(0, 'M');
             qr.addData(url);
             qr.make();
-            container.innerHTML = qr.createImgTag(4, 8);
+            const img = document.createElement('img');
+            img.src = qr.createDataURL(4, 8);
+            img.alt = 'QR-code naar dit spel';
+            container.appendChild(img);
         } else {
             container.textContent = url;
         }

@@ -13,16 +13,22 @@ const ROUNDS = [
 const App = {
     // Generate a GUID
     generateId() {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-            const r = Math.random() * 16 | 0;
-            return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-        });
+        return crypto.randomUUID();
     },
 
     // localStorage helpers
     loadGame(id) {
-        const data = localStorage.getItem('aj_game_' + id);
-        return data ? JSON.parse(data) : null;
+        try {
+            const data = localStorage.getItem('aj_game_' + id);
+            if (!data) return null;
+            const game = JSON.parse(data);
+            if (!game || typeof game !== 'object' || !Array.isArray(game.players) || !Array.isArray(game.scores)) {
+                return null;
+            }
+            return game;
+        } catch {
+            return null;
+        }
     },
 
     saveGame(game) {
