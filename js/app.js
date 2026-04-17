@@ -150,6 +150,49 @@ const App = {
         const gameMatch = hash.match(/^game\/([a-f0-9-]+)$/);
         if (gameMatch) return { view: 'game', gameId: gameMatch[1] };
 
+        if (hash.startsWith('view/')) {
+            const encoded = hash.slice(5);
+            const game = this.decodeGameState(encoded);
+            if (game) return { view: 'viewer', game };
+        }
+
         return { view: 'home' };
+    },
+
+    // Encode game state to base64 URL-safe string
+    encodeGameState(game) {
+        const minimal = {
+            p: game.players,
+            d: game.dealerIndex,
+            r: game.currentRound,
+            s: game.scores,
+            st: game.status
+        };
+        try {
+            const json = JSON.stringify(minimal);
+            return btoa(unescape(encodeURIComponent(json)));
+        } catch {
+            return null;
+        }
+    },
+
+    // Decode game state from base64 URL-safe string
+    decodeGameState(encoded) {
+        try {
+            const json = decodeURIComponent(escape(atob(encoded)));
+            const minimal = JSON.parse(json);
+            if (!minimal || !Array.isArray(minimal.p) || !Array.isArray(minimal.s)) {
+                return null;
+            }
+            return {
+                players: minimal.p,
+                dealerIndex: minimal.d,
+                currentRound: minimal.r,
+                scores: minimal.s,
+                status: minimal.st
+            };
+        } catch {
+            return null;
+        }
     }
 };

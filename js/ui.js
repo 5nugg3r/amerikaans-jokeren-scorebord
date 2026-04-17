@@ -3,6 +3,7 @@
 const UI = {
     currentGame: null,
     editingRound: null,
+    isViewer: false,
 
     // DOM helpers
     $(id) { return document.getElementById(id); },
@@ -66,8 +67,14 @@ const UI = {
                 window.location.hash = 'game/' + this.currentGame.id + '/setup';
                 return;
             }
+            this.isViewer = false;
             this.showView('game');
             this.renderGame();
+        } else if (route.view === 'viewer') {
+            this.currentGame = route.game;
+            this.isViewer = true;
+            this.showView('game');
+            this.renderViewer();
         } else {
             this.currentGame = null;
             this.showView('home');
@@ -180,6 +187,19 @@ const UI = {
         }
     },
 
+    // Read-only viewer for shared URL
+    renderViewer() {
+        const game = this.currentGame;
+        this.renderRoundInfo();
+        this.renderScoreboard();
+        this.$('game-actions').innerHTML = '<p style="color: #64748b; text-align: center;">Alleen-lezen weergave — ververs de QR-code voor updates</p>';
+        this.$('qr-container').classList.add('hidden');
+
+        if (game.status === 'finished') {
+            this.showWinner();
+        }
+    },
+
     renderRoundInfo() {
         const game = this.currentGame;
         const info = this.$('round-info');
@@ -221,8 +241,9 @@ const UI = {
             if (isCurrent && !hasScores) rowClass = 'current-round';
             else if (isFuture && !hasScores) rowClass = 'future-round';
 
-            return `<tr class="${rowClass}"${hasScores ? ` onclick="UI.openEditModal(${ri})" style="cursor:pointer"` : ''}>
-                <td>${ri + 1}. ${round}${hasScores ? ' <span class="edit-hint">&#9998;</span>' : ''}</td>
+            const editable = hasScores && !this.isViewer;
+            return `<tr class="${rowClass}"${editable ? ` onclick="UI.openEditModal(${ri})" style="cursor:pointer"` : ''}>
+                <td>${ri + 1}. ${round}${editable ? ' <span class="edit-hint">&#9998;</span>' : ''}</td>
                 ${game.players.map((_, pi) => {
                     if (hasScores) {
                         return `<td>${game.scores[ri][pi]}</td>`;
@@ -356,7 +377,9 @@ const UI = {
     renderQRCode() {
         const container = this.$('qr-code');
         container.innerHTML = '';
-        const url = window.location.href.split('#')[0] + '#game/' + this.currentGame.id;
+        const encoded = App.encodeGameState(this.currentGame);
+        if (!encoded) return;
+        const url = window.location.href.split('#')[0] + '#view/' + encoded;
 
         if (typeof qrcode !== 'undefined') {
             const qr = qrcode(0, 'M');
