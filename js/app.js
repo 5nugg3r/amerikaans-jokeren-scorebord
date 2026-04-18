@@ -103,6 +103,16 @@ const App = {
         this.saveGame(game);
     },
 
+    // Skip current round (store null)
+    skipRound(game) {
+        game.scores.push(null);
+        game.currentRound = game.scores.length;
+        if (game.currentRound >= ROUNDS.length) {
+            game.status = 'finished';
+        }
+        this.saveGame(game);
+    },
+
     // Update scores for a previously completed round
     updateScores(game, roundIndex, roundScores) {
         game.scores[roundIndex] = roundScores;
@@ -113,6 +123,7 @@ const App = {
     getTotals(game) {
         const totals = new Array(game.players.length).fill(0);
         for (const round of game.scores) {
+            if (!round) continue;
             for (let i = 0; i < round.length; i++) {
                 totals[i] += round[i];
             }

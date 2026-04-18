@@ -236,15 +236,21 @@ const UI = {
         this.$('scoreboard-body').innerHTML = ROUNDS.map((round, ri) => {
             const isCurrent = ri === game.currentRound && game.status === 'playing';
             const isFuture = ri > game.currentRound - 1 && ri >= game.scores.length;
-            const hasScores = ri < game.scores.length;
+            const hasEntry = ri < game.scores.length;
+            const isSkipped = hasEntry && game.scores[ri] === null;
+            const hasScores = hasEntry && !isSkipped;
             let rowClass = '';
-            if (isCurrent && !hasScores) rowClass = 'current-round';
-            else if (isFuture && !hasScores) rowClass = 'future-round';
+            if (isSkipped) rowClass = 'skipped-round';
+            else if (isCurrent && !hasEntry) rowClass = 'current-round';
+            else if (isFuture && !hasEntry) rowClass = 'future-round';
 
-            const editable = hasScores && !this.isViewer;
+            const editable = hasEntry && !this.isViewer;
             return `<tr class="${rowClass}"${editable ? ` onclick="UI.openEditModal(${ri})" style="cursor:pointer"` : ''}>
                 <td>${ri + 1}. ${round}${editable ? ' <span class="edit-hint">&#9998;</span>' : ''}</td>
                 ${game.players.map((_, pi) => {
+                    if (isSkipped) {
+                        return `<td>-</td>`;
+                    }
                     if (hasScores) {
                         return `<td>${game.scores[ri][pi]}</td>`;
                     }
@@ -269,10 +275,22 @@ const UI = {
         const container = this.$('game-actions');
 
         if (game.status === 'playing') {
-            container.innerHTML = `<button class="btn btn-primary btn-large" onclick="UI.openScoreModal()">Scores invoeren</button>`;
+            container.innerHTML = `
+                <button class="btn btn-primary btn-large" onclick="UI.openScoreModal()">Scores invoeren</button>
+                <button class="btn btn-secondary btn-large" onclick="UI.onSkipRound()">Ronde overslaan</button>`;
         } else if (game.status === 'finished') {
             container.innerHTML = `<button class="btn btn-primary btn-large" onclick="UI.onNewGame()">Nieuw spel starten</button>`;
         }
+    },
+
+    // === Skip Round ===
+    onSkipRound() {
+        const game = this.currentGame;
+        if (game.status !== 'playing') return;
+        const roundName = ROUNDS[game.currentRound];
+        if (!confirm(`Weet je zeker dat je "${roundName}" wilt overslaan?`)) return;
+        App.skipRound(game);
+        this.renderGame();
     },
 
     // === Score Modal ===
@@ -287,7 +305,8 @@ const UI = {
         const game = this.currentGame;
         if (roundIndex >= game.scores.length) return;
         this.editingRound = roundIndex;
-        this._openScoreModal(roundIndex, game.scores[roundIndex]);
+        const existing = game.scores[roundIndex];
+        this._openScoreModal(roundIndex, existing);
     },
 
     _openScoreModal(roundIndex, existingScores) {
