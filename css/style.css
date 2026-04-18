@@ -408,6 +408,11 @@ body {
     font-weight: 600;
     font-size: 0.8125rem;
     color: var(--color-text-muted);
+    max-width: 10rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: default;
 }
 
 .scoreboard tbody tr:hover {
@@ -641,6 +646,10 @@ body {
     .scoreboard td {
         padding: 0.375rem 0.5rem;
         font-size: 0.875rem;
+    }
+
+    .scoreboard td:first-child {
+        max-width: 6rem;
     }
 
     .scoreboard tfoot td {

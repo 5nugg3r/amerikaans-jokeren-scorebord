@@ -5,12 +5,15 @@ Een webapp om de score bij te houden tijdens een potje Amerikaans Jokeren. Werkt
 ## Kenmerken
 
 - **Nieuw spel starten** met een unieke URL (GUID), zodat elk spel zijn eigen link heeft
-- **QR-code** om het scorebord te delen met medespeelers
+- **QR-code** om het scorebord te delen met medespeelers (bevat de actuele spelstatus)
 - **Spelers beheren** — toevoegen, verwijderen en volgorde aanpassen voordat het spel begint
 - **Deler aanwijzen** — handmatig of willekeurig, roteert automatisch per ronde
 - **Score invoer** per ronde met validatie (precies één winnaar, veelvouden van 5)
 - **Correcties** — klik op een ingevulde ronde om scores aan te passen
+- **Ronde overslaan** — voor kortere spelversies, overgeslagen rondes worden doorgestreept
 - **Cumulatief scorebord** met automatische winnaar na ronde 7
+- **Meertalig** — Nederlands, Engels, Frans en Spaans, op elk moment te wisselen
+- **Alleen-lezen modus** — meekijkers kunnen het scorebord bekijken via de QR-code
 
 ## De 7 rondes
 
@@ -37,6 +40,7 @@ Een webapp om de score bij te houden tijdens een potje Amerikaans Jokeren. Werkt
 - Vanilla HTML, CSS en JavaScript — geen frameworks, geen build-stap
 - Data opgeslagen in localStorage (geen server nodig)
 - QR-code via [qrcode-generator](https://github.com/nicolestandifer3/qrcode-generator-master) (CDN met SRI)
+- Vlaggetjes via [flagcdn.com](https://flagcdn.com)
 
 ## Gebruik
 

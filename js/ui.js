@@ -245,7 +245,7 @@ const UI = {
 
             const editable = hasEntry && !this.isViewer;
             return `<tr class="${rowClass}"${editable ? ` onclick="UI.openEditModal(${ri})" style="cursor:pointer"` : ''}>
-                <td>${ri + 1}. ${round}${editable ? ' <span class="edit-hint">&#9998;</span>' : ''}</td>
+                <td title="${round}">${ri + 1}. ${round}${editable ? ' <span class="edit-hint">&#9998;</span>' : ''}</td>
                 ${game.players.map((_, pi) => {
                     if (isSkipped) {
                         return `<td>-</td>`;
