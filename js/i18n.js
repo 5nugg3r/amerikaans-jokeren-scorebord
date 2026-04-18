@@ -3,7 +3,7 @@
 const i18n = {
     langs: {
         nl: {
-            flag: '\u{1F1F3}\u{1F1F1}',
+            flagCode: 'nl',
             data: {
                 app_title: "Amerikaans Jokeren",
                 app_subtitle: "Scorebord",
@@ -55,7 +55,7 @@ const i18n = {
             }
         },
         en: {
-            flag: '\u{1F1EC}\u{1F1E7}',
+            flagCode: 'gb',
             data: {
                 app_title: "American Rummy",
                 app_subtitle: "Scoreboard",
@@ -107,7 +107,7 @@ const i18n = {
             }
         },
         fr: {
-            flag: '\u{1F1EB}\u{1F1F7}',
+            flagCode: 'fr',
             data: {
                 app_title: "Rami Am\u00e9ricain",
                 app_subtitle: "Tableau des scores",
@@ -159,7 +159,7 @@ const i18n = {
             }
         },
         es: {
-            flag: '\u{1F1EA}\u{1F1F8}',
+            flagCode: 'es',
             data: {
                 app_title: "Rummy Americano",
                 app_subtitle: "Marcador",
@@ -268,16 +268,43 @@ const i18n = {
     },
 
     renderSelector() {
-        const selector = document.getElementById('lang-selector');
-        if (!selector) return;
-        selector.innerHTML = Object.entries(this.langs).map(([code, lang]) =>
-            `<option value="${code}" ${code === this.currentLang ? 'selected' : ''}>${lang.flag}</option>`
+        const toggle = document.getElementById('lang-toggle');
+        const dropdown = document.getElementById('lang-dropdown');
+        if (!toggle || !dropdown) return;
+
+        // Set current flag on toggle button
+        const current = this.langs[this.currentLang];
+        toggle.innerHTML = `<img src="https://flagcdn.com/w40/${current.flagCode}.png" alt="${this.currentLang.toUpperCase()}" width="24" height="16"><span class="lang-arrow">&#9662;</span>`;
+
+        // Build dropdown options (excluding current)
+        dropdown.innerHTML = Object.entries(this.langs).map(([code, lang]) =>
+            `<button class="lang-option" data-lang="${code}"><img src="https://flagcdn.com/w40/${lang.flagCode}.png" alt="${code.toUpperCase()}" width="24" height="16"></button>`
         ).join('');
-        selector.addEventListener('change', e => this.setLang(e.target.value));
+
+        // Toggle dropdown
+        toggle.addEventListener('click', e => {
+            e.stopPropagation();
+            dropdown.classList.toggle('hidden');
+        });
+
+        // Select language
+        dropdown.querySelectorAll('.lang-option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.setLang(btn.dataset.lang);
+                dropdown.classList.add('hidden');
+            });
+        });
+
+        // Close on outside click
+        document.addEventListener('click', () => {
+            dropdown.classList.add('hidden');
+        });
     },
 
     updateSelector() {
-        const selector = document.getElementById('lang-selector');
-        if (selector) selector.value = this.currentLang;
+        const toggle = document.getElementById('lang-toggle');
+        if (!toggle) return;
+        const current = this.langs[this.currentLang];
+        toggle.innerHTML = `<img src="https://flagcdn.com/w40/${current.flagCode}.png" alt="${this.currentLang.toUpperCase()}" width="24" height="16"><span class="lang-arrow">&#9662;</span>`;
     }
 };
