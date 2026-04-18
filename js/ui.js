@@ -40,6 +40,12 @@ const UI = {
         // Winner modal
         this.$('btn-new-game-end').addEventListener('click', () => this.onNewGame());
         this.$('modal-winner').querySelector('.modal-backdrop').addEventListener('click', () => this.closeModal('modal-winner'));
+
+        // Tooltip for truncated round names
+        document.addEventListener('click', e => {
+            const existing = document.querySelector('.round-tooltip');
+            if (existing) existing.remove();
+        });
     },
 
     // === Routing ===
@@ -245,7 +251,7 @@ const UI = {
 
             const editable = hasEntry && !this.isViewer;
             return `<tr class="${rowClass}"${editable ? ` onclick="UI.openEditModal(${ri})" style="cursor:pointer"` : ''}>
-                <td title="${round}">${ri + 1}. ${round}${editable ? ' <span class="edit-hint">&#9998;</span>' : ''}</td>
+                <td class="round-name" onclick="UI.showRoundTooltip(event, this)">${ri + 1}. ${round}${editable ? ' <span class="edit-hint">&#9998;</span>' : ''}</td>
                 ${game.players.map((_, pi) => {
                     if (isSkipped) {
                         return `<td>-</td>`;
@@ -413,6 +419,21 @@ const UI = {
     },
 
     // === Helpers ===
+    showRoundTooltip(e, cell) {
+        e.stopPropagation();
+        const existing = document.querySelector('.round-tooltip');
+        if (existing) existing.remove();
+
+        const rect = cell.getBoundingClientRect();
+        const tooltip = document.createElement('div');
+        tooltip.className = 'round-tooltip';
+        tooltip.textContent = cell.textContent.replace(/\s*✎\s*$/, '');
+        tooltip.style.left = rect.left + 'px';
+        tooltip.style.top = (rect.top - 4) + 'px';
+        document.body.appendChild(tooltip);
+        setTimeout(() => tooltip.remove(), 2500);
+    },
+
     closeModal(id) {
         this.$(id).classList.add('hidden');
     },
