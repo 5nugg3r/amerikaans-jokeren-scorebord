@@ -5,6 +5,34 @@
     padding: 0;
 }
 
+/* === Language Switcher === */
+.lang-switcher {
+    position: fixed;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 200;
+}
+
+.lang-switcher select {
+    font-size: 1.5rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 0.25rem 0.375rem;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    text-align: center;
+    line-height: 1;
+}
+
+.lang-switcher select:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 1px;
+}
+
 :root {
     --color-primary: #2563eb;
     --color-primary-hover: #1d4ed8;

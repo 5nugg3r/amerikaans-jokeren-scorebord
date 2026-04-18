@@ -1,14 +1,10 @@
 // === Amerikaans Jokeren - App Logic ===
 
-const ROUNDS = [
-    'Drie opvolgende kaarten',
-    'Drie gelijke kaarten',
-    'Vier opvolgende kaarten',
-    'Vier gelijke kaarten',
-    'Vijf opvolgende kaarten',
-    'Zes opvolgende kaarten',
-    'Alles in één keer'
-];
+const ROUND_KEYS = ['round_1', 'round_2', 'round_3', 'round_4', 'round_5', 'round_6', 'round_7'];
+
+function getRounds() {
+    return ROUND_KEYS.map(key => i18n.t(key));
+}
 
 const App = {
     // Generate a GUID
@@ -97,7 +93,7 @@ const App = {
     submitScores(game, roundScores) {
         game.scores.push(roundScores);
         game.currentRound = game.scores.length;
-        if (game.currentRound >= ROUNDS.length) {
+        if (game.currentRound >= ROUND_KEYS.length) {
             game.status = 'finished';
         }
         this.saveGame(game);
@@ -107,7 +103,7 @@ const App = {
     skipRound(game) {
         game.scores.push(null);
         game.currentRound = game.scores.length;
-        if (game.currentRound >= ROUNDS.length) {
+        if (game.currentRound >= ROUND_KEYS.length) {
             game.status = 'finished';
         }
         this.saveGame(game);

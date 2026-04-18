@@ -15,6 +15,7 @@ const UI = {
 
     // === Initialize ===
     init() {
+        i18n.init();
         this.bindEvents();
         this.handleRoute();
         window.addEventListener('hashchange', () => this.handleRoute());
@@ -105,20 +106,18 @@ const UI = {
         const list = this.$('player-list');
         const hasEnough = game.players.length >= 2;
 
-        // Render player list
         list.innerHTML = game.players.map((name, i) => `
             <div class="player-item" data-index="${i}">
                 <span class="player-number">${i + 1}.</span>
                 <span class="player-name">${this.escapeHtml(name)}</span>
                 <div class="player-actions">
-                    <button class="btn btn-secondary btn-icon" onclick="UI.onMovePlayer(${i}, -1)" ${i === 0 ? 'disabled' : ''} title="Omhoog">&uarr;</button>
-                    <button class="btn btn-secondary btn-icon" onclick="UI.onMovePlayer(${i}, 1)" ${i === game.players.length - 1 ? 'disabled' : ''} title="Omlaag">&darr;</button>
-                    <button class="btn btn-danger btn-icon" onclick="UI.onRemovePlayer(${i})" title="Verwijderen">&times;</button>
+                    <button class="btn btn-secondary btn-icon" onclick="UI.onMovePlayer(${i}, -1)" ${i === 0 ? 'disabled' : ''} title="${i18n.t('move_up')}">&uarr;</button>
+                    <button class="btn btn-secondary btn-icon" onclick="UI.onMovePlayer(${i}, 1)" ${i === game.players.length - 1 ? 'disabled' : ''} title="${i18n.t('move_down')}">&darr;</button>
+                    <button class="btn btn-danger btn-icon" onclick="UI.onRemovePlayer(${i})" title="${i18n.t('remove')}">&times;</button>
                 </div>
             </div>
         `).join('');
 
-        // Show/hide dealer section and start button
         const dealerSection = this.$('dealer-section');
         const setupActions = this.$('setup-actions');
         const hint = this.$('setup-hint');
@@ -187,12 +186,11 @@ const UI = {
         }
     },
 
-    // Read-only viewer for shared URL
     renderViewer() {
         const game = this.currentGame;
         this.renderRoundInfo();
         this.renderScoreboard();
-        this.$('game-actions').innerHTML = '<p style="color: #64748b; text-align: center;">Alleen-lezen weergave — ververs de QR-code voor updates</p>';
+        this.$('game-actions').innerHTML = `<p style="color: #64748b; text-align: center;">${i18n.t('viewer_readonly')}</p>`;
         this.$('qr-container').classList.add('hidden');
 
         if (game.status === 'finished') {
@@ -202,38 +200,39 @@ const UI = {
 
     renderRoundInfo() {
         const game = this.currentGame;
+        const rounds = getRounds();
         const info = this.$('round-info');
         if (game.status === 'finished') {
-            info.textContent = 'Spel afgelopen!';
+            info.textContent = i18n.t('game_finished');
         } else {
             const roundNum = game.currentRound + 1;
-            const roundName = ROUNDS[game.currentRound];
+            const roundName = rounds[game.currentRound];
             const dealerIndex = App.getDealerForRound(game, game.currentRound);
             const dealerName = game.players[dealerIndex];
-            info.innerHTML = `Ronde ${roundNum}: ${roundName}<br><span style="font-size: 0.875rem; color: #64748b;">Deler: ${this.escapeHtml(dealerName)}</span>`;
+            info.innerHTML = `${i18n.t('round_label')} ${roundNum}: ${roundName}<br><span style="font-size: 0.875rem; color: #64748b;">${i18n.t('dealer_label')}: ${this.escapeHtml(dealerName)}</span>`;
         }
     },
 
     renderScoreboard() {
         const game = this.currentGame;
+        const rounds = getRounds();
         const totals = App.getTotals(game);
 
-        // Current round dealer
         const currentDealerIndex = game.status !== 'finished'
             ? App.getDealerForRound(game, game.currentRound)
             : -1;
 
         // Head
         this.$('scoreboard-head').innerHTML = `<tr>
-            <th>Ronde</th>
-            ${game.players.map((name, i) => {
-                const isDealer = i === currentDealerIndex;
-                return `<th${isDealer ? ' class="dealer-header"' : ''}>${this.escapeHtml(name)}${isDealer ? '<span class="dealer-badge">DELER</span>' : ''}</th>`;
+            <th>${i18n.t('round_label')}</th>
+            ${game.players.map((name, idx) => {
+                const isDealer = idx === currentDealerIndex;
+                return `<th${isDealer ? ' class="dealer-header"' : ''}>${this.escapeHtml(name)}${isDealer ? `<span class="dealer-badge">${i18n.t('dealer_badge')}</span>` : ''}</th>`;
             }).join('')}
         </tr>`;
 
         // Body
-        this.$('scoreboard-body').innerHTML = ROUNDS.map((round, ri) => {
+        this.$('scoreboard-body').innerHTML = rounds.map((round, ri) => {
             const isCurrent = ri === game.currentRound && game.status === 'playing';
             const isFuture = ri > game.currentRound - 1 && ri >= game.scores.length;
             const hasEntry = ri < game.scores.length;
@@ -259,11 +258,11 @@ const UI = {
             </tr>`;
         }).join('');
 
-        // Foot (totals)
+        // Foot
         const minScore = game.scores.length > 0 ? Math.min(...totals) : null;
         this.$('scoreboard-foot').innerHTML = `<tr>
-            <td>Totaal</td>
-            ${totals.map((total, i) => {
+            <td>${i18n.t('total_label')}</td>
+            ${totals.map((total, idx) => {
                 const isWinner = game.status === 'finished' && total === minScore;
                 return `<td${isWinner ? ' class="winner-total"' : ''}>${total}</td>`;
             }).join('')}
@@ -276,10 +275,10 @@ const UI = {
 
         if (game.status === 'playing') {
             container.innerHTML = `
-                <button class="btn btn-primary btn-large" onclick="UI.openScoreModal()">Scores invoeren</button>
-                <button class="btn btn-secondary btn-large" onclick="UI.onSkipRound()">Ronde overslaan</button>`;
+                <button class="btn btn-primary btn-large" onclick="UI.openScoreModal()">${i18n.t('btn_enter_scores')}</button>
+                <button class="btn btn-secondary btn-large" onclick="UI.onSkipRound()">${i18n.t('btn_skip_round')}</button>`;
         } else if (game.status === 'finished') {
-            container.innerHTML = `<button class="btn btn-primary btn-large" onclick="UI.onNewGame()">Nieuw spel starten</button>`;
+            container.innerHTML = `<button class="btn btn-primary btn-large" onclick="UI.onNewGame()">${i18n.t('btn_new_game')}</button>`;
         }
     },
 
@@ -287,8 +286,9 @@ const UI = {
     onSkipRound() {
         const game = this.currentGame;
         if (game.status !== 'playing') return;
-        const roundName = ROUNDS[game.currentRound];
-        if (!confirm(`Weet je zeker dat je "${roundName}" wilt overslaan?`)) return;
+        const rounds = getRounds();
+        const roundName = rounds[game.currentRound];
+        if (!confirm(i18n.t('confirm_skip', { round: roundName }))) return;
         App.skipRound(game);
         this.renderGame();
     },
@@ -311,19 +311,20 @@ const UI = {
 
     _openScoreModal(roundIndex, existingScores) {
         const game = this.currentGame;
+        const rounds = getRounds();
         const roundNum = roundIndex + 1;
-        const roundName = ROUNDS[roundIndex];
+        const roundName = rounds[roundIndex];
         const isEdit = existingScores !== null;
-        this.$('modal-round-title').textContent = `${isEdit ? 'Corrigeer' : 'Ronde'} ${roundNum}: ${roundName}`;
+        const titleKey = isEdit ? 'score_modal_edit_title' : 'score_modal_title';
+        this.$('modal-round-title').textContent = i18n.t(titleKey, { num: roundNum, round: roundName });
 
-        this.$('score-inputs').innerHTML = game.players.map((name, i) => `
+        this.$('score-inputs').innerHTML = game.players.map((name, idx) => `
             <div class="score-input-row">
-                <label for="score-${i}">${this.escapeHtml(name)}</label>
-                <input type="number" id="score-${i}" min="0" step="5" value="${isEdit ? existingScores[i] : 0}" inputmode="numeric">
+                <label for="score-${idx}">${this.escapeHtml(name)}</label>
+                <input type="number" id="score-${idx}" min="0" step="5" value="${isEdit ? existingScores[idx] : 0}" inputmode="numeric">
             </div>
         `).join('');
 
-        // Remove any previous validation error
         const prevError = this.$('score-validation-error');
         if (prevError) prevError.remove();
 
@@ -338,26 +339,24 @@ const UI = {
 
     onSaveScores() {
         const game = this.currentGame;
-        const scores = game.players.map((_, i) => {
-            const input = this.$('score-' + i);
+        const scores = game.players.map((_, idx) => {
+            const input = this.$('score-' + idx);
             return Math.max(0, parseInt(input.value) || 0);
         });
 
-        // Validatie: precies één speler moet 0 punten hebben
         const zeroCount = scores.filter(s => s === 0).length;
         if (zeroCount === 0) {
-            this.showValidationError('Er moet precies één speler 0 punten hebben (de rondewinnaar).');
+            this.showValidationError(i18n.t('error_one_zero'));
             return;
         }
         if (zeroCount > 1) {
-            this.showValidationError('Er kan maar één speler 0 punten hebben per ronde.');
+            this.showValidationError(i18n.t('error_max_one_zero'));
             return;
         }
 
-        // Validatie: alle niet-nul scores moeten een veelvoud van 5 zijn
-        const invalidPlayer = scores.findIndex((s, i) => s !== 0 && s % 5 !== 0);
+        const invalidPlayer = scores.findIndex((s, idx) => s !== 0 && s % 5 !== 0);
         if (invalidPlayer >= 0) {
-            this.showValidationError(`De score van ${game.players[invalidPlayer]} moet een veelvoud van 5 zijn.`);
+            this.showValidationError(i18n.t('error_multiple_of_5', { player: game.players[invalidPlayer] }));
             return;
         }
 
@@ -387,7 +386,7 @@ const UI = {
         const winner = App.getWinner(this.currentGame);
         this.$('winner-info').innerHTML = `
             <div class="winner-name">${this.escapeHtml(winner.name)}</div>
-            <div class="winner-score">${winner.score} punten</div>
+            <div class="winner-score">${winner.score} ${i18n.t('points_suffix')}</div>
         `;
         this.$('modal-winner').classList.remove('hidden');
     },
@@ -406,7 +405,7 @@ const UI = {
             qr.make();
             const img = document.createElement('img');
             img.src = qr.createDataURL(4, 8);
-            img.alt = 'QR-code naar dit spel';
+            img.alt = i18n.t('qr_alt');
             container.appendChild(img);
         } else {
             container.textContent = url;
