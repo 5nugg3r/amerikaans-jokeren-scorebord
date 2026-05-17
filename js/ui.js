@@ -90,7 +90,11 @@ const UI = {
 
     // === Home ===
     onNewGame() {
-        const game = App.createGame();
+        const previousPlayers = this.currentGame && this.currentGame.status === 'finished'
+            ? [...this.currentGame.players]
+            : null;
+        this.closeModal('modal-winner');
+        const game = App.createGame(previousPlayers);
         window.location.hash = 'game/' + game.id + '/setup';
     },
 
@@ -327,7 +331,7 @@ const UI = {
         this.$('score-inputs').innerHTML = game.players.map((name, idx) => `
             <div class="score-input-row">
                 <label for="score-${idx}">${this.escapeHtml(name)}</label>
-                <input type="number" id="score-${idx}" min="0" step="5" value="${isEdit ? existingScores[idx] : 0}" inputmode="numeric">
+                <input type="number" id="score-${idx}" min="0" step="5" value="${isEdit ? existingScores[idx] : 0}" inputmode="numeric" onfocus="if(this.value==='0')this.value='';" onblur="if(this.value==='')this.value='0';">
             </div>
         `).join('');
 

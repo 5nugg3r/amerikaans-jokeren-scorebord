@@ -32,11 +32,11 @@ const App = {
     },
 
     // Create a new game
-    createGame() {
+    createGame(players) {
         const id = this.generateId();
         const game = {
             id,
-            players: [],
+            players: players || [],
             dealerIndex: -1,
             currentRound: 0,
             scores: [],
