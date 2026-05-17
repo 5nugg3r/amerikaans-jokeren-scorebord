@@ -127,9 +127,15 @@ const App = {
         return totals;
     },
 
-    // Get dealer index for a specific round
+    // Get dealer index for a specific round (skipped rounds don't advance the dealer)
     getDealerForRound(game, roundIndex) {
-        return (game.dealerIndex + roundIndex) % game.players.length;
+        let playedRounds = 0;
+        for (let i = 0; i < roundIndex; i++) {
+            if (game.scores[i] != null) {
+                playedRounds++;
+            }
+        }
+        return (game.dealerIndex + playedRounds) % game.players.length;
     },
 
     // Get winner (lowest score)
